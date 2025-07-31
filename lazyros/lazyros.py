@@ -16,6 +16,7 @@ from lazyros.widgets.node_list_widget import NodeListWidget
 from lazyros.widgets.log_view_widget import LogViewWidget
 from lazyros.widgets.info_view_widget import InfoViewWidget
 from lazyros.widgets.topic_list_widget import TopicListWidget
+from lazyros.widgets.service_list_widget import ServiceListWidget
 from lazyros.widgets.parameter_list_widget import ParameterListWidget
 from lazyros.modals.topic_info_modal import TopicInfoModal  # Import TopicInfoModal
 from lazyros.modals.message_modal import MessageModal  # Import MessageModal
@@ -58,6 +59,9 @@ class LazyRosApp(App):
                     with Container(classes="list-container"):
                         yield Static("Parameters", classes="frame-title")
                         yield ParameterListWidget(self.ros_node, id="parameter-list-content")
+                    with ScrollableContainer(classes="list-container"):
+                        yield Static("Services", classes="frame-title")
+                        yield ServiceListWidget()
 
             with Container(id="right-frame", classes="right-pane"):
                 print("Adding right pane...")
