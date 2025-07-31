@@ -18,3 +18,4 @@ parameter:
   /servo_node*
   *use_sim_time
   *qos_override*
+service:
