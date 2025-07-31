@@ -10,7 +10,8 @@ class IgnoreParser:
         patterns = {
             'node': [],
             'topic': [],
-            'parameter': []
+            'parameter': [],
+            'service': [],
         }
         if not os.path.exists(self.ignore_file_path):
             print(f"Ignore file not found at {self.ignore_file_path}. No filtering will be applied.")
@@ -30,6 +31,8 @@ class IgnoreParser:
                         current_type = 'topic'
                     elif line.startswith('parameter'):
                         current_type = 'parameter'
+                    elif line.startswith('service'):
+                        current_type = 'service'
                     elif current_type:
                         # Add any non-empty, non-comment line after a type header as a pattern
                         patterns[current_type].append(self._glob_to_regex(line))
