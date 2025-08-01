@@ -47,7 +47,7 @@ class TopicListWidget(Container):
     def __init__(self, ros_node: Node, **kwargs):
         super().__init__(**kwargs)
         self.ros_node = ros_node
-        self.topic_list_view = ListView()
+        self.listview = ListView()
         self.search_input = Input(placeholder="Search topics...")
         self.search_input.display = False
         self.is_searching = False
@@ -64,30 +64,30 @@ class TopicListWidget(Container):
     def compose(self) -> ComposeResult:
         #yield Label("ROS Topics:")
         yield self.search_input
-        yield self.topic_list_view
+        yield self.listview
 
     def on_mount(self) -> None:
         self._fetch_ros_topics()  # Initial fetch
         self.set_interval(5, self._fetch_ros_topics)  # Fetch new data periodically (increased interval)
         # Ensure first item is highlighted on startup
-        if self.topic_list_view.children:
-            self.topic_list_view.index = 0
+        if self.listview.children:
+            self.listview.index = 0
 
     def on_key(self, event: Key) -> None:
         if self.search_input.has_focus:
             if event.key == "up":
-                if self.topic_list_view.index is not None and self.topic_list_view.index > 0:
-                    self.topic_list_view.index -= 1
-                elif self.topic_list_view.index is None and len(self.topic_list_view.children) > 0:
-                    self.topic_list_view.index = len(self.topic_list_view.children) - 1  # Select last if None
-                self.topic_list_view.scroll_visible()  # Scroll to the new index
+                if self.listview.index is not None and self.listview.index > 0:
+                    self.listview.index -= 1
+                elif self.listview.index is None and len(self.topic_list_view.children) > 0:
+                    self.listview.index = len(self.topic_list_view.children) - 1  # Select last if None
+                self.listview.scroll_visible()  # Scroll to the new index
                 event.stop()
             elif event.key == "down":
-                if self.topic_list_view.index is not None and self.topic_list_view.index < len(self.topic_list_view.children) - 1:
-                    self.topic_list_view.index += 1
-                elif self.topic_list_view.index is None and len(self.topic_list_view.children) > 0:
-                    self.topic_list_view.index = 0  # Select first if None
-                self.topic_list_view.scroll_visible()  # Scroll to the new index
+                if self.listview.index is not None and self.listview.index < len(self.topic_list_view.children) - 1:
+                    self.listview.index += 1
+                elif self.listview.index is None and len(self.topic_list_view.children) > 0:
+                    self.listview.index = 0  # Select first if None
+                self.listview.scroll_visible()  # Scroll to the new index
                 event.stop()
             elif event.key == "escape":  # Escape from search input
                 self.action_clear_search()
@@ -113,7 +113,7 @@ class TopicListWidget(Container):
             self.current_search_term = ""
             self.search_input.display = False
             self.is_searching = False
-            self.topic_list_view.focus()
+            self.listview.focus()
             self._refresh_display_list()  # Refresh to show all items
 
     async def on_input_changed(self, event: Input.Changed) -> None:
@@ -128,7 +128,7 @@ class TopicListWidget(Container):
         """Handle submission of the search input."""
         if event.input == self.search_input:
             # self.is_searching = False # User might want to keep searching with current term
-            self.topic_list_view.focus()
+            self.listview.focus()
 
     def _fetch_ros_topics(self) -> None:
         """Fetches ROS topics and updates the list if data has changed."""
@@ -144,9 +144,9 @@ class TopicListWidget(Container):
         except Exception as e:
             # Handle error display - perhaps a dedicated error label or log
             # For now, if list is empty, show error there. This might get overwritten.
-            if not self.topic_list_view.children:  # Check if list is already empty
-                self.topic_list_view.clear()
-                self.topic_list_view.append(ListItem(Label(f"Error fetching topics: {escape_markup(str(e))}")))
+            if not self.listview.children:  # Check if list is already empty
+                self.listview.clear()
+                self.listview.append(ListItem(Label(f"Error fetching topics: {escape_markup(str(e))}")))
 
     def _refresh_display_list(self) -> None:
         """Clears and repopulates the ListView based on current data and search term."""
@@ -168,8 +168,8 @@ class TopicListWidget(Container):
             if search_term:  # Filter if search_term is active
                 display_names = [name for name in all_topic_names_sorted if search_term in name.lower()]
 
-            current_index = self.topic_list_view.index
-            self.topic_list_view.clear()
+            current_index = self.listview.index
+            self.listview.clear()
             items = []
 
             if not self.previous_topic_data and not search_term:
@@ -197,23 +197,23 @@ class TopicListWidget(Container):
                     else:
                         items.append(ListItem(Label(escape_markup(name_str), shrink=False)))
 
-            self.topic_list_view.extend(items)
+            self.listview.extend(items)
 
             if items:
                 if current_index is not None and 0 <= current_index < len(items):
-                    self.topic_list_view.index = current_index
+                    self.listview.index = current_index
                 elif len(items) > 0:
-                    self.topic_list_view.index = 0
+                    self.listview.index = 0
             # If no items, index will be None, which is fine.
 
         except Exception as e:
             # This is a fallback error display if _refresh_display_list itself fails
-            self.topic_list_view.clear()  # Clear again to ensure no partial content
-            self.topic_list_view.append(ListItem(Label(f"Error rendering topic list: {escape_markup(str(e))}")))
+            self.listview.clear()  # Clear again to ensure no partial content
+            self.listview.append(ListItem(Label(f"Error rendering topic list: {escape_markup(str(e))}")))
 
     def action_show_topic_info(self) -> None:
         """Show detailed information about the selected topic in a modal."""
-        if self.topic_list_view.index is None:
+        if self.listview.index is None:
             return
 
         # Check if previous_topic_data contains an error
@@ -236,7 +236,7 @@ class TopicListWidget(Container):
         if search_term:
             displayed_names = [name for name in all_topic_names if search_term in name.lower()]
 
-        if self.topic_list_view.index is None or not (0 <= self.topic_list_view.index < len(displayed_names)):
+        if self.listview.index is None or not (0 <= self.listview.index < len(displayed_names)):
             return
 
         selected_topic_name = displayed_names[self.topic_list_view.index]
@@ -249,7 +249,7 @@ class TopicListWidget(Container):
 
     def action_echo_topic(self) -> None:
         """Echo the selected topic in a modal dialog."""
-        if self.topic_list_view.index is None:
+        if self.listview.index is None:
             return
 
         if self.previous_topic_data.get("error") is not None:
@@ -268,7 +268,7 @@ class TopicListWidget(Container):
         if search_term:
             displayed_names = [name for name in all_topic_names if search_term in name.lower()]
 
-        if self.topic_list_view.index is None or not (0 <= self.topic_list_view.index < len(displayed_names)):
+        if self.listview.index is None or not (0 <= self.listview.index < len(displayed_names)):
             return
 
         selected_topic_name = displayed_names[self.topic_list_view.index]
@@ -290,7 +290,7 @@ class TopicListWidget(Container):
     def on_list_view_highlighted(self, event):
         """Handle when a topic is highlighted/selected in the ListView."""
         try:
-            index = self.topic_list_view.index
+            index = self.listview.index
             print(f"[TOPIC LIST] Highlighted event, index: {index}")
             
             if index is None or index < 0 or index >= len(self.topic_list_view.children):
@@ -298,7 +298,7 @@ class TopicListWidget(Container):
                 print("[TOPIC LIST] Invalid index")
                 return
 
-            selected_item = self.topic_list_view.children[index]
+            selected_item = self.listview.children[index]
             if not selected_item.children:
                 self.selected_topic_name = None
                 print("[TOPIC LIST] No children")

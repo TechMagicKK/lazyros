@@ -35,7 +35,7 @@ class NodeListWidget(Container):
     def __init__(self, ros_node: Node, ignore_file_path='config/display_ignore.yaml', **kwargs) -> None:
         super().__init__(**kwargs)
         self.ros_node = ros_node
-        self.node_list_view = ListView()
+        self.listview = ListView()
         self.previous_node_names = set()
         self.selected_node_name = None
         self.ignore_parser = IgnoreParser(ignore_file_path)
@@ -50,16 +50,16 @@ class NodeListWidget(Container):
 
     def compose(self) -> ComposeResult:
         #yield Label("ROS Nodes:")
-        yield self.node_list_view
+        yield self.listview
 
     def on_mount(self) -> None:
         asyncio.create_task(self.update_node_list())
         self.set_interval(5, lambda: asyncio.create_task(self.update_node_list()))
         self.set_interval(1, self._update_if_ready)
-        self.node_list_view.focus()
+        self.listview.focus()
         # Ensure first item is highlighted on startup
-        if self.node_list_view.children:
-            self.node_list_view.index = 0
+        if self.listview.children:
+            self.listview.index = 0
 
     async def update_node_list(self) -> None:
         node_set = set(self.launched_nodes.keys())
@@ -71,8 +71,8 @@ class NodeListWidget(Container):
                 None, lambda: subprocess.run("ros2 node list", shell=True, capture_output=True, text=True)
             )
             if result.returncode != 0:
-                self.node_list_view.clear()
-                self.node_list_view.append(ListItem(Label("[red]Error fetching nodes[/]")))
+                self.listview.clear()
+                self.listview.append(ListItem(Label("[red]Error fetching nodes[/]")))
                 return
 
             for line in result.stdout.splitlines():
@@ -101,8 +101,8 @@ class NodeListWidget(Container):
                 return
 
             sorted_names = sorted(self.launched_nodes.keys())
-            current_index = self.node_list_view.index
-            self.node_list_view.clear()
+            current_index = self.listview.index
+            self.listview.clear()
             for name in sorted_names:
                 status = self.launched_nodes[name].status
                 is_lifecycle = self.launched_nodes[name].is_lifecycle
@@ -113,25 +113,25 @@ class NodeListWidget(Container):
 
                 label = RichText.assemble(RichText("●", style=f"bold {status}"), RichText(status_symbol, style=f"bold yellow"), "  ", RichText("/"+name))
                 nodes.append(ListItem(Label(label)))
-            self.node_list_view.extend(nodes)
+            self.listview.extend(nodes)
 
             if current_index is not None and current_index < len(nodes):
-                self.node_list_view.index = current_index
+                self.listview.index = current_index
             elif nodes:
-                self.node_list_view.index = 0
+                self.listview.index = 0
 
         except Exception as e:
-            self.node_list_view.clear()
-            self.node_list_view.append(ListItem(Label(f"[red]Error fetching nodes: {e}[/]")))
+            self.listview.clear()
+            self.listview.append(ListItem(Label(f"[red]Error fetching nodes: {e}[/]")))
 
     def on_list_view_highlighted(self, event):
         try:
-            index = self.node_list_view.index
-            if index is None or index < 0 or index >= len(self.node_list_view.children):
+            index = self.listview.index
+            if index is None or index < 0 or index >= len(self.listview.children):
                 self.selected_node_name = None
                 return
 
-            selected_item = self.node_list_view.children[index]
+            selected_item = self.listview.children[index]
             if not selected_item.children:
                 self.selected_node_name = None
                 return

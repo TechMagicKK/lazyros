@@ -29,9 +29,9 @@ Horizontal {
 }
 
 /* Style for the content area within the frames */
-#node-list-content, 
-#topic-list-content
-#parameter-list-content,
+#node-listview, 
+#topic-listview
+#parameter-listview,
 #log-view-content
 {
     border: none;
@@ -39,24 +39,24 @@ Horizontal {
     overflow-y: auto; /* Allow scrolling if content overflows */
 }
 
-#node-list-content ListView {
+#node-listview ListView {
     border: none;
     background: transparent; /* Ensure no background color */
 }
 
 
-#topic-list-content ListView {
+#topic-listview ListView {
     border: none;
     background: transparent; /* Ensure no background color */
 }
 
-#parameter-list-content ListView {
+#parameter-listview ListView {
     border: none;
     background: transparent; /* Ensure no background color */
 }
 
 /* Adjust label inside node list content */
-#node-list-content Label {
+#node-listview Label {
     margin-bottom: 0;
 }
 

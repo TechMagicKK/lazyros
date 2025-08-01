@@ -35,7 +35,7 @@ class ParameterListWidget(Container):
     def __init__(self, ros_node: Node, **kwargs) -> None:
         super().__init__(**kwargs)
         self.ros_node = ros_node
-        self.parameter_list_view = ListView()
+        self.listview = ListView()
         self.previous_parameters_display_list: List[str] = []
         self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="param_list")
         self._current_update_task: Optional[asyncio.Task] = None
@@ -51,10 +51,10 @@ class ParameterListWidget(Container):
 
     def compose(self) -> ComposeResult:
         #yield Label("ROS Parameters:")
-        yield ScrollableContainer(self.parameter_list_view)
+        yield ScrollableContainer(self.listview)
 
     def on_mount(self) -> None:
-        self.parameter_list_view.initial_index = 0
+        self.listview.initial_index = 0
         self.set_interval(5, self.trigger_update_list)
         self.trigger_update_list()
 
@@ -128,13 +128,13 @@ class ParameterListWidget(Container):
         """Update the parameter list view with new data."""
 
         if self.previous_parameters_display_list != new_params_list:
-            self.parameter_list_view.clear()
+            self.listview.clear()
             items = [ListItem(Label(param_str)) for param_str in new_params_list] if new_params_list else [ListItem(Label("[No parameters available or error during fetch]"))]
-            self.parameter_list_view.extend(items)
-            if items and (self.parameter_list_view.index is None or self.parameter_list_view.index >= len(items)):
-                self.parameter_list_view.index = 0
+            self.listview.extend(items)
+            if items and (self.listview.index is None or self.listview.index >= len(items)):
+                self.listview.index = 0
             elif not items:
-                self.parameter_list_view.index = None
+                self.listview.index = None
             self.previous_parameters_display_list = new_params_list
 
     async def _update_list_async(self) -> None:
@@ -175,13 +175,13 @@ class ParameterListWidget(Container):
         """Handle when a parameter is highlighted/selected in the ListView."""
 
         try:
-            index = self.parameter_list_view.index
+            index = self.listview.index
             
-            if index is None or index < 0 or index >= len(self.parameter_list_view.children):
+            if index is None or index < 0 or index >= len(self.listview.children):
                 self._selected_param = None
                 return
             
-            selected_item = self.parameter_list_view.children[index]
+            selected_item = self.listview.children[index]
             if not selected_item.children:
                 self._selected_param = None
                 return
@@ -236,7 +236,7 @@ class ParameterListWidget(Container):
     def action_set_selected_parameter(self) -> None:
         """Action to set the value of the currently selected parameter."""
 
-        highlighted_item_widget: Optional[ListItem] = self.parameter_list_view.highlighted_child
+        highlighted_item_widget: Optional[ListItem] = self.listview.highlighted_child
         if not highlighted_item_widget:
             self.app.bell()
             return
