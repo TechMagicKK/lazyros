@@ -61,7 +61,7 @@ class LazyRosApp(App):
                         yield ParameterListWidget(self.ros_node, id="parameter-list-content")
                     with ScrollableContainer(classes="list-container"):
                         yield Static("Services", classes="frame-title")
-                        yield ServiceListWidget()
+                        yield ServiceListWidget(self.ros_node, id="service-list-content")
 
             with Container(id="right-frame", classes="right-pane"):
                 print("Adding right pane...")
