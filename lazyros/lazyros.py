@@ -26,7 +26,7 @@ from lazyros.widgets.parameter.parameter_list import ParameterListWidget
 from lazyros.widgets.parameter.parameter_value import ParameterValueWidget
 from lazyros.widgets.parameter.parameter_info import ParameterInfoWidget
 
-from lazyros.widgets.service.service_list_widget import ServiceListWidget
+from lazyros.widgets.service.service_list import ServiceListWidget
 # FIXME: make and add ServiceValueWidget & ServiceInfoWidget
 
 from textual.screen import ModalScreen
@@ -82,11 +82,13 @@ class LazyRosApp(App):
     NODE_TAB_ID_LIST = ["log", "info"]
     TOPIC_TAB_ID_LIST = ["echo", "info"]
     PARAMETER_TAB_ID_LIST = ["value", "info"]
+    SERVICE_TAB_ID_LIST = ["caller", "info"]
 
     TAB_ID_DICT = {
         "node": ["log", "lifecycle", "info"],
         "topic": ["echo", "info"],
         "parameter": ["value", "info"],
+        "service": ["caller", "info"],
     }
 
     def __init__(self, ros_node: Node):
@@ -96,9 +98,10 @@ class LazyRosApp(App):
         self.left_pane_widgets = [
             "#node-listview",
             "#topic-listview", 
-            "#parameter-listview"
+            "#parameter-listview",
+            "#service-listview"
         ]
-        self._left_containers = ["node", "topic", "parameter"]
+        self._left_containers = ["node", "topic", "parameter", "service"]
         self.current_pane_index = 0
         self.current_right_pane_config = "node"
         self.current_selected_topic = None
@@ -170,6 +173,10 @@ class LazyRosApp(App):
                         yield ParameterValueWidget(self.ros_node, id="parameter-value-view-content")
                     with TabPane("Info", id="info"):
                         yield ParameterInfoWidget(self.ros_node, id="parameter-info-view-content")
+                with TabbedContent("Info", id="service-tabs", classes="hidden"):
+                    with TabPane("Caller", id="service_caller"):
+                        # FIXME: call compose service_caller_widget here
+                        pass
 
         yield Footer()
 
