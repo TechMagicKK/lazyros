@@ -26,6 +26,9 @@ from lazyros.widgets.parameter.parameter_list import ParameterListWidget
 from lazyros.widgets.parameter.parameter_value import ParameterValueWidget
 from lazyros.widgets.parameter.parameter_info import ParameterInfoWidget
 
+from lazyros.widgets.service.service_list_widget import ServiceListWidget
+# FIXME: make and add ServiceValueWidget & ServiceInfoWidget
+
 from textual.screen import ModalScreen
 
 
@@ -145,6 +148,9 @@ class LazyRosApp(App):
                     with ScrollableContainer(classes="list-container", id="parameter-container"):
                         yield Static("Parameters", classes="frame-title")
                         yield ParameterListWidget(self.ros_node, id="parameter-listview")
+                    with ScrollableContainer(classes="list-container", id="service-container"):
+                        yield Static("Services", classes="frame-title")
+                        yield ServiceListWidget(self.ros_node, id="service-listview")
 
             with Container(classes="right-pane", id="right-frame"):
                 with TabbedContent("Log", "Lifecycle", "Info", id="node-tabs"):
