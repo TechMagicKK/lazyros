@@ -42,13 +42,9 @@ class IgnoreParser:
 
     def _glob_to_regex(self, glob_pattern):
         """Converts a glob pattern to a regex pattern."""
-        # Escape special regex characters
         regex = re.escape(glob_pattern)
-        # Replace glob '*' with regex '.*'
         regex = regex.replace(r'\*', '.*')
-        # Replace glob '?' with regex '.'
         regex = regex.replace(r'\?', '.')
-        # Anchor the regex to match the whole string
         regex = f"^{regex}$"
         return regex
 
@@ -63,5 +59,5 @@ class IgnoreParser:
 
 if __name__ == "__main__":
     # Example usage
-    ignore_parser = IgnoreParser('../config/display_ignore.yaml')
-    print(ignore_parser.should_ignore('/move_group: move', 'parameter'))  # Adjust the test case as needed
+    ignore_parser = IgnoreParser('../../config/display_ignore.yaml')
+    print(ignore_parser.should_ignore('/lazyros_monitor_node: use_sim_time', 'parameter'))  # Adjust the test case as needed

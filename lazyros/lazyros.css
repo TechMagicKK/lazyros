@@ -19,6 +19,7 @@ Horizontal {
 /* Specific width for right frame */
 #right-frame {
     width: 70%; /* 7 parts */
+    border: round white; /* Thin white border */
 }
 
 /* Style for the frame titles */
@@ -28,31 +29,51 @@ Horizontal {
 }
 
 /* Style for the content area within the frames */
-#node-list-content, #log-view-content { /* Updated ID for right pane content */
-    border: none; /* Ensure no extra borders */
-    height: 1fr; /* Take remaining space in the frame */
+#node-listview, 
+#topic-listview
+#parameter-listview,
+#log-view-content
+{
+    border: none;
+    height: 1.2fr; /* Take remaining space in the frame */
     overflow-y: auto; /* Allow scrolling if content overflows */
 }
 
-/* Remove border from the ListView itself */
-#node-list-content ListView {
+#node-listview ListView {
     border: none;
+    background: transparent; /* Ensure no background color */
+}
+
+
+#topic-listview ListView {
+    border: none;
+    background: transparent; /* Ensure no background color */
+}
+
+#parameter-listview ListView {
+    border: none;
+    background: transparent; /* Ensure no background color */
 }
 
 /* Adjust label inside node list content */
-#node-list-content Label {
+#node-listview Label {
     margin-bottom: 0;
 }
 
 /* Style the RichLog within the log view */
 #log-view-content RichLog {
     border: none; /* Ensure no extra borders */
+    background: transparent;
 }
 
 /* Style for the containers around each list and its title */
 .list-container {
     border:round white; /* Thin white border */
-    margin-bottom: 1; /* Add some space between the list containers */
     height: 1fr; /* Allow containers to share vertical space */
+}
+
+/* Hidden class for switching between tab configurations */
+.hidden {
+    display: none;
 }
 

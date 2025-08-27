@@ -1,4 +1,5 @@
 node:
+  /_ros2cli*
   /launch_ros*
   /move_group*
   /transform*
@@ -9,6 +10,7 @@ node:
 topic:
   # Add topic patterns here if needed
 parameter:
+  /lazyros_monitor_node*
   /launch_ros*
   /rosbridge*
   /robot_state_publisher*
@@ -16,6 +18,5 @@ parameter:
   /move_group*
   /moveit*
   /servo_node*
-  *use_sim_time
   *qos_override*
 service:
