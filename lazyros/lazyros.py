@@ -177,8 +177,6 @@ class LazyRosApp(App):
                     with TabPane("Caller", id="service_caller"):
                         service_type = 'trobo_interfaces/srv/GetBoxes'
                         service_name = 'get_boxes'
-                        #yield ParameterInfoWidget(self.ros_node, id="parameter-info-view-content")
-                        from textual.widgets import Label
                         yield ServiceCallView(service_name=service_name, service_type=service_type, ros_node=self.ros_node, id="service-call-view-content")
 
         yield Footer()

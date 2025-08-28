@@ -37,6 +37,7 @@ Horizontal {
 }
 
 /* Style for the content area within the frames */
+#service-listview,
 #node-listview,
 #topic-listview #parameter-listview,
 #log-view-content {
@@ -45,6 +46,12 @@ Horizontal {
     /* Take remaining space in the frame */
     overflow-y: auto;
     /* Allow scrolling if content overflows */
+}
+
+ListView#service-listview {
+    border: none;
+    background: transparent;
+    /* Ensure no background color */
 }
 
 #node-listview ListView {

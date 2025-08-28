@@ -31,18 +31,6 @@ class ServiceListWidget(Container):
     A widget to display the list of ROS services.
     """
 
-    DEFAULT_CSS = """
-    ServiceListWidget {
-        overflow: hidden;
-    }
-
-    #scroll-area {
-        overflow-y: auto;
-        overflow-x: auto;
-        height: 1fr;
-    }
-    """
-
     def __init__(self, ros_node: Node, **kwargs):
         super().__init__(**kwargs)
         self.ros_node = ros_node
