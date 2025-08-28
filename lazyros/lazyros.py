@@ -27,7 +27,7 @@ from lazyros.widgets.parameter.parameter_value import ParameterValueWidget
 from lazyros.widgets.parameter.parameter_info import ParameterInfoWidget
 
 from lazyros.widgets.service.service_list import ServiceListWidget
-# FIXME: make and add ServiceValueWidget & ServiceInfoWidget
+from lazyros.widgets.service.service_call_view import ServiceCallView 
 
 from textual.screen import ModalScreen
 
@@ -175,8 +175,11 @@ class LazyRosApp(App):
                         yield ParameterInfoWidget(self.ros_node, id="parameter-info-view-content")
                 with TabbedContent("Info", id="service-tabs", classes="hidden"):
                     with TabPane("Caller", id="service_caller"):
-                        # FIXME: call compose service_caller_widget here
-                        pass
+                        service_type = 'trobo_interfaces/srv/GetBoxes'
+                        service_name = 'get_boxes'
+                        #yield ParameterInfoWidget(self.ros_node, id="parameter-info-view-content")
+                        from textual.widgets import Label
+                        yield ServiceCallView(service_name=service_name, service_type=service_type, ros_node=self.ros_node, id="service-call-view-content")
 
         yield Footer()
 

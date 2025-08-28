@@ -2,7 +2,8 @@
 # Immitates the behavior of rqt_service_caller.
 
 from rqt_py_common.message_helpers import get_service_class
-from textual.app import App, ComposeResult
+from textual.app import ComposeResult
+from textual.widget import Widget
 from textual.widgets import Label, Input, Button, Tree, Static, TextArea
 from textual.containers import Horizontal, HorizontalScroll, Vertical, VerticalScroll, Container
 from textual.widgets._tree import TreeNode
@@ -20,16 +21,16 @@ class ServiceParser:
     - This class creates input widgets for each field in the service message.
     - Finally, this class returns the service caller widget.
     """
-    CSS = """
+    DEFAULT_CSS = """
     TreeNode {
         height: 1;
         width: 1fr;
         background: #1f1f1f;;
     }
-    Input {
+    .service-parser Input {
         height: 1;
         border: none;
-        background: #1f1f1f;
+        background: transparent; /* Optional: Ensure no background color */
     }
     Tree {
         background: #1f1f1f;
@@ -39,6 +40,7 @@ class ServiceParser:
         overflow-x: auto;
     }
     Label {
+        background: red;
         layout: horizontal;
         overflow-x: auto;
     }
@@ -127,7 +129,6 @@ class ServiceParser:
             elif mode == 'output':
                 # output widget (limit user input by message type)
                 node_id = 'output_' + node_id
-                print('in leaf. output label is added.')
                 if type(message) is str:
                     # scrollable label for long string
                     self.output_widgets.append(Label('', name=node_id))
@@ -151,7 +152,7 @@ class ServiceParser:
             raise ValueError(f"Service class for {service_type} not found.")
         else:
             print(f'Service class for {service_type} found.')
-            tree = Tree(service_type)
+            tree = Tree(service_type, id='service-call-request-msg-tree')
             root = tree.root.add('Request')
             tree.root.expand_all()
             request_msg = loaded_service_class.Request()
@@ -171,7 +172,7 @@ class ServiceParser:
         if loaded_service_class is None:
             raise ValueError(f"Service class for {service_type} not found.")
         else:
-            tree = Tree(service_type)
+            tree = Tree(service_type, id='service-call-response-msg-tree')
             root = tree.root.add('Response')
             tree.root.expand_all()
             response_msg = loaded_service_class.Response()
@@ -184,8 +185,8 @@ class ServiceParser:
             return tree, self.output_widgets, treepaths
 
 
-class ServiceCallView(App):
-    CSS = """
+class ServiceCallView(Container):
+    DEFAULT_CSS = """
     Tree {
         background: #1f1f1f;
     }
@@ -206,8 +207,8 @@ class ServiceCallView(App):
     """
     CSS_PATH = 'vertical_layout.tcss'
 
-    def __init__(self, service_name, service_type: str, ros_node: Node):
-        super().__init__()
+    def __init__(self, service_name, service_type: str, ros_node: Node, **kwargs):
+        super().__init__(**kwargs)
         self.service_name = service_name
         self.service_type = service_type
         self.node = ros_node
