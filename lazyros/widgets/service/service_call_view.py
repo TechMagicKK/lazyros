@@ -197,10 +197,14 @@ class ServiceCallView(Container):
         self.service_listview = None
         self.selected_service = None
         self.current_service = None
+
+    def on_mount(self) -> None:
+        self.set_interval(0.3, self.update_display)
     
     def update_display(self):
         self.service_listview = self.app.query_one('#service-listview')
         self.selected_service = self.service_listview.selected_service if self.service_listview else None
+        print(f'selected service : {self.selected_service}')
 
         if self.selected_service is None:
             self.clear()
@@ -209,11 +213,11 @@ class ServiceCallView(Container):
         if self.selected_service == self.current_service:
             return
         
-        self.current_service = self.selected_service
-        parser = ServiceParser()
-        self.request_tree_widget, self.request_message_type_widgets, self.request_treepath = parser.parse_request_and_get_tree_widget(self.service_type)
-        self.response_tree_widget, self.response_message_type_widgets, self.response_treepath = parser.parse_response_and_get_tree_widget(self.service_type)
-        # START HERE
+        #self.current_service = self.selected_service
+        #parser = ServiceParser()
+        #self.request_tree_widget, self.request_message_type_widgets, self.request_treepath = parser.parse_request_and_get_tree_widget(self.service_type)
+        #self.response_tree_widget, self.response_message_type_widgets, self.response_treepath = parser.parse_response_and_get_tree_widget(self.service_type)
+        ## START HERE
 
 
 

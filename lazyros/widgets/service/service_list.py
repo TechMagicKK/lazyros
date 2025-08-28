@@ -93,5 +93,6 @@ class ServiceListWidget(Container):
             return
 
         service_name = str(item.children[0].renderable).strip()
-        if self.selected_service != service_name:
-            self.selected_service = service_name
+        if service_name:
+            service_type = self.service_dict.get(service_name)[0]
+            self.selected_service = (service_name, service_type)
