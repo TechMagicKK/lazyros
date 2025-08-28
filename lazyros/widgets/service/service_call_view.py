@@ -187,10 +187,6 @@ class ServiceParser:
 
 
 class ServiceCallView(Container):
-    DEFAULT_CSS = """
-    }
-    """
-    #CSS_PATH = 'vertical_layout.tcss'
 
     def __init__(self, service_name, service_type: str, ros_node: Node, **kwargs):
         super().__init__(**kwargs)
