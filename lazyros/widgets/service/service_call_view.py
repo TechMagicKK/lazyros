@@ -25,12 +25,12 @@ class ServiceParser:
     TreeNode {
         height: 1;
         width: 1fr;
-        background: #1f1f1f;;
+        background: #1f1f1f;
     }
-    .service-parser Input {
+    Input.service-call-input {
         height: 1;
         border: none;
-        background: transparent; /* Optional: Ensure no background color */
+        background: blue;
     }
     Tree {
         background: #1f1f1f;
@@ -39,10 +39,9 @@ class ServiceParser:
         layout: horizontal;
         overflow-x: auto;
     }
-    Label {
+    Label.service-call-output {
+        height: 1;
         background: red;
-        layout: horizontal;
-        overflow-x: auto;
     }
     """
 
@@ -118,26 +117,28 @@ class ServiceParser:
             if mode == 'input':
                 # input widget (limit user input by message type)
                 if type(message) is str:
-                    self.input_widgets.append(Input(value=repr(message), type='text', name=node_id))
+                    self.input_widgets.append(Input(value=repr(message), type='text', name=node_id, classes='service-call-input'))
                 elif type(message) is int:
-                    self.input_widgets.append(Input(value=str(message), type='integer', name=node_id))
+                    self.input_widgets.append(Input(value=str(message), type='integer', name=node_id, classes='service-call-input'))
                 elif type(message) is float:
-                    self.input_widgets.append(Input(value=str(message), type='number', name=node_id))
+                    self.input_widgets.append(Input(value=str(message), type='number', name=node_id, classes='service-call-input'))
                 else:
-                    self.input_widgets.append(Input(value=str(message), name=node_id))
+                    self.input_widgets.append(Input(value=str(message), name=node_id, classes='service-call-input'))
+                self.input_widgets[-1].styles.text_overflow = 'clip'
+                self.input_widgets[-1].remove_class('valid')
                 return
             elif mode == 'output':
                 # output widget (limit user input by message type)
                 node_id = 'output_' + node_id
                 if type(message) is str:
                     # scrollable label for long string
-                    self.output_widgets.append(Label('', name=node_id))
+                    self.output_widgets.append(Label('', name=node_id, classes='service-call-output'))
                 elif type(message) is int:
-                    self.output_widgets.append(Label('', name=node_id))
+                    self.output_widgets.append(Label('', name=node_id, classes='service-call-output'))
                 elif type(message) is float:
-                    self.output_widgets.append(Label('', name=node_id))
+                    self.output_widgets.append(Label('', name=node_id, classes='service-call-output'))
                 else:
-                    self.output_widgets.append(Label('', name=node_id))
+                    self.output_widgets.append(Label('', name=node_id, classes='service-call-output'))
                 return
 
         return tree, self.flattenpaths
@@ -187,25 +188,9 @@ class ServiceParser:
 
 class ServiceCallView(Container):
     DEFAULT_CSS = """
-    Tree {
-        background: #1f1f1f;
-    }
-    Input {
-        height: 1;
-        border: none;
-        background: #1f1f1f;
-    }
-    #call_service_button {
-        background: gray;
-        color: white;
-        text-align: center;
-        height: 3;
-        width: 100%;
-        margin: 0 0 1 0;
-        padding: 0 1 0 1;
     }
     """
-    CSS_PATH = 'vertical_layout.tcss'
+    #CSS_PATH = 'vertical_layout.tcss'
 
     def __init__(self, service_name, service_type: str, ros_node: Node, **kwargs):
         super().__init__(**kwargs)
@@ -249,7 +234,7 @@ class ServiceCallView(Container):
         parser = ServiceParser()
         self.request_tree_widget, self.request_message_type_widgets, self.request_treepath = parser.parse_request_and_get_tree_widget(self.service_type)
         self.response_tree_widget, self.response_message_type_widgets, self.response_treepath = parser.parse_response_and_get_tree_widget(self.service_type)
-        yield Button(f'📞 Call {self.service_type} service', id='call_service_button')
+        yield Button(f'📞 Call {self.service_type} service', id='call-service-button')
         with Vertical():
             with Horizontal():
                 with Vertical(classes='column'):
@@ -259,7 +244,7 @@ class ServiceCallView(Container):
                     yield Label('')
                     for widget in self.request_message_type_widgets:
                         yield widget
-            yield Static('')  # Placeholder for layout consistency
+            #yield Static('')  # Placeholder for layout consistency
             yield Static('')  # Placeholder for layout consistency
             with HorizontalScroll():
                 with VerticalScroll():
@@ -381,7 +366,7 @@ class ServiceCallView(Container):
         - Makes a service request from the input widgets.
         - Calls the service with the request.
         """
-        if event.button.id == 'call_service_button':
+        if event.button.id == 'call-service-button':
             print(f'Button {event.button.id} pressed.')
             loaded_service_class = get_service_class(self.service_type)
             if loaded_service_class is None:

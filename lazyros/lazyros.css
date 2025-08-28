@@ -5,54 +5,65 @@ Horizontal {
 }
 
 /* Common frame styling */
-#left-frame, #right-frame {
-    width: 1fr; /* Share width equally initially */
-    padding: 0 1; /* Add padding inside frames */
+#left-frame,
+#right-frame {
+    width: 1fr;
+    /* Share width equally initially */
+    padding: 0 1;
+    /* Add padding inside frames */
     /* Use vertical layout for title and content */
 }
 
 /* Specific width for left frame */
 #left-frame {
-    width: 30%; /* 3 parts */
+    width: 30%;
+    /* 3 parts */
 }
 
 /* Specific width for right frame */
 #right-frame {
-    width: 70%; /* 7 parts */
-    border: round white; /* Thin white border */
+    width: 70%;
+    /* 7 parts */
+    border: round white;
+    /* Thin white border */
 }
 
 /* Style for the frame titles */
 .frame-title {
-    text-align: center; /* Center text within the Static widget */
-    width: 100%; /* Take full width of the frame */
+    text-align: center;
+    /* Center text within the Static widget */
+    width: 100%;
+    /* Take full width of the frame */
 }
 
 /* Style for the content area within the frames */
-#node-listview, 
-#topic-listview
-#parameter-listview,
-#log-view-content
-{
+#node-listview,
+#topic-listview #parameter-listview,
+#log-view-content {
     border: none;
-    height: 1.2fr; /* Take remaining space in the frame */
-    overflow-y: auto; /* Allow scrolling if content overflows */
+    height: 1.2fr;
+    /* Take remaining space in the frame */
+    overflow-y: auto;
+    /* Allow scrolling if content overflows */
 }
 
 #node-listview ListView {
     border: none;
-    background: transparent; /* Ensure no background color */
+    background: transparent;
+    /* Ensure no background color */
 }
 
 
 #topic-listview ListView {
     border: none;
-    background: transparent; /* Ensure no background color */
+    background: transparent;
+    /* Ensure no background color */
 }
 
 #parameter-listview ListView {
     border: none;
-    background: transparent; /* Ensure no background color */
+    background: transparent;
+    /* Ensure no background color */
 }
 
 /* Adjust label inside node list content */
@@ -62,14 +73,17 @@ Horizontal {
 
 /* Style the RichLog within the log view */
 #log-view-content RichLog {
-    border: none; /* Ensure no extra borders */
+    border: none;
+    /* Ensure no extra borders */
     background: transparent;
 }
 
 /* Style for the containers around each list and its title */
 .list-container {
-    border:round white; /* Thin white border */
-    height: 1fr; /* Allow containers to share vertical space */
+    border: round white;
+    /* Thin white border */
+    height: 1fr;
+    /* Allow containers to share vertical space */
 }
 
 /* Hidden class for switching between tab configurations */
@@ -77,3 +91,31 @@ Horizontal {
     display: none;
 }
 
+/* Service Call View Specific Styles */
+TreeNode {
+    height: 1;
+    width: 1fr;
+    background: #1f1f1f;
+}
+
+Input.service-call-input {
+    height: 1;
+    border: none;
+    background: #1f1f1f;
+}
+
+Tree {
+    background: #1f1f1f;
+}
+
+Label.service-call-output {
+    height: 1;
+}
+
+#call-service-button {
+    background: gray;
+    color: white;
+    text-align: center;
+    height: 3;
+    width: 100%;
+}
