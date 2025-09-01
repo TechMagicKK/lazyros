@@ -5,7 +5,7 @@ from rqt_py_common.message_helpers import get_service_class
 from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import Label, Input, Button, Tree, Static, TextArea
-from textual.containers import Horizontal, HorizontalScroll, Vertical, VerticalScroll, Container
+from textual.containers import Horizontal, HorizontalScroll, Vertical, VerticalScroll, Container, Grid
 from textual.widgets._tree import TreeNode
 import copy
 import array
@@ -124,8 +124,6 @@ class ServiceParser:
                     self.input_widgets.append(Input(value=str(message), type='number', name=node_id, classes='service-call-input'))
                 else:
                     self.input_widgets.append(Input(value=str(message), name=node_id, classes='service-call-input'))
-                self.input_widgets[-1].styles.text_overflow = 'clip'
-                self.input_widgets[-1].remove_class('valid')
                 return
             elif mode == 'output':
                 # output widget (limit user input by message type)
@@ -143,7 +141,8 @@ class ServiceParser:
 
         return tree, self.flattenpaths
 
-    def parse_request_and_get_tree_widget(self, service_type: str):
+
+    def parse_request_and_get_tree_widget(self, service_type: str, tree: Tree):
         """
         Returns a textual tree widget that represents the request message in service.
         """
@@ -153,7 +152,8 @@ class ServiceParser:
             raise ValueError(f"Service class for {service_type} not found.")
         else:
             print(f'Service class for {service_type} found.')
-            tree = Tree(service_type, id='service-call-request-msg-tree')
+            #tree = Tree(service_type, id='service-call-request-msg-tree')
+            tree.clear()
             root = tree.root.add('Request')
             tree.root.expand_all()
             request_msg = loaded_service_class.Request()
@@ -165,7 +165,7 @@ class ServiceParser:
             _, treepaths = self._recursive_parse(request_msg, root, mode='input')
             return tree, self.input_widgets, treepaths
 
-    def parse_response_and_get_tree_widget(self, service_type: str):
+    def parse_response_and_get_tree_widget(self, service_type: str, tree: Tree):
         """
         Returns a textual tree widget that represents the response message in service.
         """
@@ -173,7 +173,8 @@ class ServiceParser:
         if loaded_service_class is None:
             raise ValueError(f"Service class for {service_type} not found.")
         else:
-            tree = Tree(service_type, id='service-call-response-msg-tree')
+            #tree = Tree(service_type, id='service-call-response-msg-tree')
+            tree.clear()
             root = tree.root.add('Response')
             tree.root.expand_all()
             response_msg = loaded_service_class.Response()
@@ -190,72 +191,153 @@ class ServiceCallView(Container):
 
     def __init__(self, service_name, service_type: str, ros_node: Node, **kwargs):
         super().__init__(**kwargs)
-        self.service_name = service_name
-        self.service_type = service_type
+        self.service_name = None
+        self.service_type = None
         self.node = ros_node
 
         self.service_listview = None
         self.selected_service = None
         self.current_service = None
 
+        self.request_message_type_list = []
+        self.response_message_type_list = []
+        self.count = 0
+
     def on_mount(self) -> None:
-        self.set_interval(0.3, self.update_display)
+        self.set_interval(0.1, self.update_display)
     
-    def update_display(self):
+    def get_selected_service_from_list(self):
         self.service_listview = self.app.query_one('#service-listview')
         self.selected_service = self.service_listview.selected_service if self.service_listview else None
-        print(f'selected service : {self.selected_service}')
 
         if self.selected_service is None:
-            self.clear()
-            return
-        
-        if self.selected_service == self.current_service:
-            return
+            return None
         
         #self.current_service = self.selected_service
-        #parser = ServiceParser()
-        #self.request_tree_widget, self.request_message_type_widgets, self.request_treepath = parser.parse_request_and_get_tree_widget(self.service_type)
-        #self.response_tree_widget, self.response_message_type_widgets, self.response_treepath = parser.parse_response_and_get_tree_widget(self.service_type)
-        ## START HERE
+        self.service_name = self.selected_service[0]
+        self.service_type = self.selected_service[1]
+        if self.service_name is None or self.service_type is None:
+            return None
+        
+        return self.selected_service
+    
 
+    def update_display(self) -> None:
+        print('Updating service call view display...')
+        selected_service = self.get_selected_service_from_list()
 
+        # 前回値と異なる場合のみ再構築
+        print(selected_service, self.current_service)
+        if selected_service != self.current_service:
+            self.current_service = selected_service
+            if selected_service is None:
+                print('No service selected.')
+                return
 
-    def clear(self):
-        """Clear all widget contents"""
-        self.request_tree_widget = Tree('Service is not selected')
-        self.response_tree_widget = Tree('Service is not selected')
-        self.request_message_type_widgets = [Input('')]
-        self.response_message_type_widgets = [Label('')]
-        return
+            print(f'Selected service: {selected_service}')
+            # read selected service
+            service_name = selected_service[0]
+            service_type = selected_service[1]
+            
+            # construct widget parts
+            parser = ServiceParser()
+            request_msg_tree_container = self.query_one('#request-tree-container', Container)
+            response_msg_tree_container = self.query_one('#response-tree-container', Container)
+            request_input_container = self.query_one('#request-input-container', Vertical)
+            response_label_container = self.query_one('#response-label-container', Vertical)
 
+            # clear previous widgets
+            for child in request_msg_tree_container.children:
+                child.remove()
+            for child in response_msg_tree_container.children:
+                child.remove()
+            for child in request_input_container.children:
+                child.remove()
+            for child in response_label_container.children:
+                child.remove()
+
+            # populate message tree and input/output label widgets
+            request_msg_tree = Tree('request message tree')
+            response_msg_tree = Tree('response message tree')
+            self.request_tree_widget, self.request_message_type_list, self.request_treepath = parser.parse_request_and_get_tree_widget(service_type, request_msg_tree)
+            self.response_tree_widget, self.response_message_type_list, self.response_treepath = parser.parse_response_and_get_tree_widget(service_type, response_msg_tree)
+
+            request_msg_tree_container.mount(self.request_tree_widget)
+            response_msg_tree_container.mount(self.response_tree_widget)
+            request_input_container.mount(Label('')) # spacer
+            request_input_container.mount(Label('')) # spacer
+            request_input_container.mount(*self.request_message_type_list)
+            response_label_container.mount(*self.response_message_type_list)
 
     def compose(self) -> ComposeResult:
-        parser = ServiceParser()
-        self.request_tree_widget, self.request_message_type_widgets, self.request_treepath = parser.parse_request_and_get_tree_widget(self.service_type)
-        self.response_tree_widget, self.response_message_type_widgets, self.response_treepath = parser.parse_response_and_get_tree_widget(self.service_type)
-        yield Button(f'📞 Call {self.service_type} service', id='call-service-button')
-        with Vertical():
-            with Horizontal():
-                with Vertical(classes='column'):
-                    yield self.request_tree_widget
-                with Vertical(classes='column'):
-                    yield Label('')
-                    yield Label('')
-                    for widget in self.request_message_type_widgets:
-                        yield widget
-            #yield Static('')  # Placeholder for layout consistency
-            yield Static('')  # Placeholder for layout consistency
-            with HorizontalScroll():
-                with VerticalScroll():
-                    yield self.response_tree_widget
-                with VerticalScroll():
-                    yield Static('')
-                    yield Static('')
-                    for widget in self.response_message_type_widgets:
-                        # FIXME: long message can't showed
-                        widget.styles.text_overflow_x = 'scroll'
-                        yield widget
+        yield Button(f'📞 Call service', id='call-service-button')
+        with Grid(id='service-caller-grid'):
+            #(1,1)
+            yield Container(Tree('request message tree', id='service-call-request-msg-tree'), id='request-tree-container')
+            #(1,2)
+            with Vertical(id='request-input-container'):
+                for widget in self.request_message_type_list:
+                    yield widget
+            #(2,1)
+            yield Container(Tree('response message tree', id='service-call-response-msg-tree'), id='response-tree-container')
+            #(2,2)
+            with Vertical(id='response-label-container'):
+                for widget in self.response_message_type_list:
+                    yield widget
+
+        #self.request_tree_container.mount(self.request_tree_widget)
+        #self.response_tree_container.mount(self.response_tree_widget)
+
+        #self.request_horizontal_container.mount(self.request_tree_container)
+        #for widget in self.request_message_type_list:
+        #    self.request_horizontal_container.mount(widget)
+        #self.response_horizontal_container.mount(self.response_tree_container)
+        #for widget in self.response_message_type_list:
+        #    self.response_horizontal_container.mount(widget)
+
+        #with Vertical(id ='request_response_vertical_container'):
+        #    with Horizontal(id='request_horizontal_container'):
+        #        with Vertical(id='request_tree_container'):
+        #            yield Tree('Request message tree', id='service-call-request-msg-tree')
+        #        response_vertical_container =  Vertical(id='response_horizontal_container')
+        #        yield response_vertical_container
+        #        response_vertical_container.mount(Label(''))
+        #        response_vertical_container.mount(Label(''))
+        #        for widget in self.response_message_type_list:
+        #            response_vertical_container.mount(widget)
+        #    with Horizontal(id='response_horizontal_container'):
+        #        with Vertical(id='response_tree_container'):
+        #            yield Tree('Response message tree', id='service-call-response-msg-tree')
+        #        request_vertical_container = Vertical(id='request_vertical_container')
+        #        yield request_vertical_container
+        #        request_vertical_container.mount(Label(''))
+        #        request_vertical_container.mount(Label(''))
+        #        for widget in self.response_message_type_list:
+        #            request_vertical_container.mount(widget)
+
+        #selected_service = self.get_selected_service_from_list()
+        #service_name = selected_service[0]
+        #service_type = selected_service[1]
+        #parser = ServiceParser()
+        #self.request_tree_widget, self.request_message_type_widgets, self.request_treepath = parser.parse_request_and_get_tree_widget(service_type)
+        #self.response_tree_widget, self.response_message_type_widgets, self.response_treepath = parser.parse_response_and_get_tree_widget(service_type)
+        #with Vertical():
+        #    with Horizontal():
+        #        with Vertical(classes='column'):
+        #            yield self.request_tree_widget
+        #        with Vertical(classes='column'):
+        #            yield Label('')
+        #            yield Label('')
+        #            yield self.request_message_type_widgets
+        #    #yield Static('')  # Placeholder for layout consistency
+        #    #yield Static('')  # Placeholder for layout consistency
+        #    with HorizontalScroll():
+        #        with VerticalScroll()
+        #            yield self.response_tree_widget
+        #        with VerticalScroll():
+        #            yield Static('')
+        #            yield Static('')
+        #            yield self.response_message_type_widgets
 
     def _set_nested_attribute(self, obj, flatten_path: str, value):
         """

@@ -82,7 +82,6 @@ class ServiceListWidget(Container):
         self.listview.extend(service_list)
     
     def on_list_view_highlighted(self, event):
-        
         index = self.listview.index
         if index is None or not (0 <= index < len(self.listview.children)):
             self.selected_service = None
